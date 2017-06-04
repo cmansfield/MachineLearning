@@ -1,7 +1,14 @@
 
-# Use trained data to make a prediction
-from sklearn.externals import joblib
+'''
+    This script creates training data for
+    playing a poker game
+'''
 
+from sklearn.externals import joblib
+from random import randint
+
+
+n_test_data = 100000
 
 suits = ['\u2665','\u2660','\u2666','\u2663']
 suit_names = ['Hearts','Spades','Diamonds','Clubs']
@@ -25,6 +32,12 @@ class Card:
         return self.__value == other.value \
                and other.suit == self.__suit
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __hash__(self):
+        return hash(self.__str__())
+
     def __str__(self):
         return '{} {} of {} {}'.format(
             suits[self.__suit - 1],
@@ -35,19 +48,17 @@ class Card:
 
 class Hand:
     def __init__(self):
-        self.__cards = []
+        self.__cards = set()
 
     def add_card(self, card):
         if not isinstance(card, Card): raise ValueError('Only Cards can be added to a hand')
-        self.__cards.append(card)
+        self.__cards.add(card)
 
     def reset_hand(self):
-        self.__cards = []
+        self.__cards = set()
 
-    def has_card(self,other):
-        for card in self.__cards:
-            if other == card: return True
-        return False
+    def has_card(self,card):
+        return card in self.__cards
 
     def stringify(self):
         str_simple = ''
@@ -61,37 +72,54 @@ class Hand:
             str_complex += card.__str__() + '\n'
         return str_complex
 
+def check_hands(hands,card):
+    for hand in hands:
+        if hand.has_card(card): return True
+    return False
 
-hand = Hand()
-hand.add_card(Card(1, 12))
-hand.add_card(Card(2, 1))
-hand.add_card(Card(4, 13))
-hand.add_card(Card(3, 4))
-print(hand)
-print(hand.stringify())
+def draw_card(hands):
+    draw_new_card = lambda : Card(
+        randint(1, len(suits)),
+        randint(1, len(value_names)))
+    top_card = draw_new_card()
+    while(check_hands(hands,top_card)):
+        top_card = draw_new_card()
+    return top_card
 
-test_card = Card(4,13)
-print('Has card: {}'.format(str(test_card)))
-print(hand.has_card(test_card))
-print()
+# with open('poker_game_training.data', 'w') as f:
+#     for i in range(0, n_test_data):
+game = ''
+hands = [Hand(),Hand(),Hand()]
 
-test_card = Card(2,5)
-print('Has card: {}'.format(str(test_card)))
-print(hand.has_card(test_card))
+for x in range(0, 3):
+    hands[0].add_card(draw_card(hands))
+    hands[1].add_card(draw_card(hands))
 
+for x in range(0, 2):
+    hands[2].add_card(draw_card(hands))
 
-# model = joblib.load('trained_poker.pkl')
-#
-# # scikit-learn is expecting a list of data sets
-# hands_to_value = [
-#     hand_to_value
-# ]
-#
-# # Run the model and make a prediction
-# predicted_hand_values = model.predict(hands_to_value)
-#
-# predicted_value = predicted_hand_values[0]
-#
-# print('This poker hand has an estimated value of {:.2f}'.format(predicted_value))
-#
+for hand in hands:
+    print(hand)
 
+model = joblib.load('trained_poker.pkl')
+
+# scikit-learn is expecting a list of data sets
+hands_to_value = [
+    (hands[0].stringify() + ',' + hands[2].stringify()).split(','),
+    (hands[1].stringify() + ',' + hands[2].stringify()).split(',')
+]
+
+# Run the model and make a prediction
+predicted_hand_values = model.predict(hands_to_value)
+
+player_hand_predicted_value = int(round(predicted_hand_values[0]))
+opponent_hand_predicted_value = int(round(predicted_hand_values[1]))
+
+print('Your poker hand has an estimated value of {:.2f}'.format(predicted_hand_values[0]))
+print('Opponent poker hand has an estimated value of {:.2f}'.format(predicted_hand_values[1]))
+
+if(player_hand_predicted_value > opponent_hand_predicted_value):
+    print('You Won!')
+elif(player_hand_predicted_value < opponent_hand_predicted_value):
+    print('You lost...')
+else: print('Looks like you tied')
