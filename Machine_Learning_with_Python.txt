@@ -1,0 +1,229 @@
+
+Gradient Descent:
+	An optimization algorithm that can be used to minimize the cost function
+		and find the best weights
+	1. The cost function and random starting weights are passed to the 
+		gradient descent function
+	2. It will iteratively tweak the weights in an attempt to get the cost
+		funciton to equal zero
+	3. Then it will return the weights that it got when the cost function
+		returned values as close to zero as possible
+		
+Gradient Boosting:
+	A machine learning algorithm that uses an ensemble of decision trees to
+		predict values.
+		
+Ensemble Learning:
+	Each decision tree that focuses on just a small part of a problem and the
+		trees don't lead to other trees but each help contribute to the final
+		decision.
+		
+		
+NumPy: A python library that effienently works linear algebra functions and arrays
+scikit-learn: Library of routines for numberical optimization
+pandas: Easy to load and work with large data sets similar to a spreadsheet
+
+
+Overfitting:
+	Training set error is very low
+	Test set error is very high
+	
+	fixes: 
+		Reduce the number of features
+		Increase the about of training data
+	
+Underfitting:
+	Training set error very high
+	Test set error very high
+	
+	fixes:
+		Make the model more complex
+			More features
+			Make decision trees deeper
+
+Good Fit:
+	Trainig set error low
+	Test set error low
+
+
+# Deep learning manual setup
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn import ensemble
+from sklearn.metrics import mean_absolute_error
+from sklearn.externals import joblib
+
+df = dp.read_csv('ml_house_data.csv')
+
+del df['house_number']
+del df['street_number']
+del df['zip_code']
+
+# Replace categorical data with one-hot encoded data
+features_df = pd.get_dummies(df, columns=['garage_type', 'city'])
+
+# Remove the sale price as a feature
+del features_df['sale_price']
+
+# Create input and output arrays
+x = features_df.as_matrix()
+y = df['sale_price'].as_matrix()
+
+# Split the data set into a training set (70%) and a test set (30%)
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3)
+
+# Fit regression model
+model = ensemble.GradientBoostingRegressor(
+	n_estimators=1000,		# Number of decision trees to build
+	learning_rate=0.1,		# Impact of each decision tree
+	max_depth=6,			# How many layers deep a decision tree can be
+	min_samples_leaf=9,		# How many times a value of a feature must show up inorder to build a decision tree around it
+	max_features=0.1,		# % of features to randomly consider in creating a branch in our tree
+	loss='huber'			# calculate the error rate
+)
+
+model.fit(x_train, y_train)
+
+# Save the trained model to a file so we can use it in other programs
+joblib.dump(model, 'trained_house_model.pkl')
+
+# Find the error rate on the training set
+mse = mean_absolute_error(y_train, model.predict(x_train))
+print('Trainig set mean absolute error: %.4f' % mse)
+
+# Find the error rate on the test set
+mse = mean_absolute_error(y_test, model.predict(x_test))
+print('Test set mean absolute error: %.4f' % mse)
+
+
+
+
+
+
+
+# Deep learning - Grid Search
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn import ensemble
+from sklearn.metrics import mean_absolute_error
+from sklearn.externals import joblib
+
+df = dp.read_csv('ml_house_data.csv')
+
+del df['house_number']
+del df['street_number']
+del df['zip_code']
+
+# Replace categorical data with one-hot encoded data
+features_df = pd.get_dummies(df, columns=['garage_type', 'city'])
+
+# Remove the sale price as a feature
+del features_df['sale_price']
+
+# Create input and output arrays
+x = features_df.as_matrix()
+y = df['sale_price'].as_matrix()
+
+# Split the data set into a training set (70%) and a test set (30%)
+x_train, x_test, y_train, y_test = train_test_split(x,y,test_size=0.3)
+
+model = ensemble.GradientBoostingRegressor()
+
+# A list of parameters we want to try to find the best fit
+param_grid = {
+	'n_estimators': [500, 1000, 3000],				# Number of decision trees to build
+	'learning_rate': [0.1, 0.5, 0.02, 0.01],		# Impact of each decision tree
+	'max_depth': [4, 6],							# How many layers deep a decision tree can be
+	'min_samples_leaf': [3, 5, 9, 17],				# How many times a value of a feature must show up inorder to build a decision tree around it
+	'max_features': [1.0, 0.3, 0.1],				# % of features to randomly consider in creating a branch in our tree
+	'loss': ['ls', 'lad', 'huber']					# calculate the error rate
+}
+
+# Define the grid search we want to run. Run it with four cpus in parallel
+gs_cv = GridSearchCV(model, param_grid, n_jobs=4)
+
+# Run the grid search - on only the training data
+gs_cv.fit(x_train, y_train)
+
+# Print the parameters that gave us the best result
+print(gs_cv.best_params_)
+
+# Find the error rate on the training set
+mse = mean _absolute_error(y_train, gs_cv.predict(x_train))
+print('Trainig set mean absolute error: %.4f' % mse)
+
+# Find the error rate on the test set
+mse = mean_absolute_error(y_test, gs_cv.predict(x_test))
+print('Trainig set mean absolute error: %.4f' % mse)
+
+
+
+
+
+
+
+# Code to see what percentage a feature was used
+# Good for seeing what features to keep and which
+# ones to remove
+
+import numpy as np
+from sklearn.externals import joblib
+
+# The feature labels from our data set
+feature_labels = np.array(['list', 'of', 'features'])
+
+# Load the trained model created from the previous scripts
+model = joblib.load('trained_house_model.pkl')
+
+importance = model.feature_importances_
+
+# Sort the feature labels based on feature importance
+feature_indexes_by_importance = importance.argsort()
+
+for index in feature_indexes_by_importance:
+	print("{} - {:.2f}%".format(feature_labels[index], (importance[index] * 100.0)))
+
+
+
+
+
+
+# Use trained data to make a prediction
+from sklearn.externals import joblib
+
+model = joblib.load('trained_house_model.pkl')
+
+# Here is the data set we want to make a prediction on
+house_to_value = [
+	2006,	# year built
+	1,		# stories
+	4, 		# number of bedrooms
+	3, 		# full bathrooms
+	2200,	#livable sqft
+	2350,	# total sqft
+	0,		# garage sqft
+	True,	# has fireplace
+	False	# has pool
+]
+
+# scikit-learn is expecting a list of data sets
+homes_to_value = [
+	house_to_value
+]
+
+# Run the model and make a prediction
+predicted_home_values = model.predict(homes_to_value)
+
+predicted_value = predicted_home_values[0]
+
+print('This house has an estimated value of ${:,.2f}'.format(predicted_value))
+
+
+
+
+
+
+
+
+
+
