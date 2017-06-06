@@ -9,7 +9,7 @@ from sklearn.externals import joblib
 
 
 def run():
-    df = pd.read_csv('poker-hand-training-true.data', header=0)
+    df = pd.read_csv('poker-hand-training.data', header=0)
 
     # Remove the sale price as a feature
     features_df = df.drop('class', axis=1)
@@ -23,12 +23,12 @@ def run():
 
     # Fit regression model
     model = ensemble.GradientBoostingRegressor(
-        n_estimators=3000,  # Number of decision trees to build
-        learning_rate=0.5,  # Impact of each decision tree
-        max_depth=4,        # How many layers deep a decision tree can be
-        min_samples_leaf=17, # How many times a value of a feature must show up inorder to build a decision tree around it
-        max_features=1.0,   # % of features to randomly consider in creating a branch in our tree
-        loss='huber'        # calculate the error rate
+        n_estimators=7000,   # Number of decision trees to build
+        learning_rate=0.5,   # Impact of each decision tree
+        max_depth=4,         # How many layers deep a decision tree can be
+        min_samples_leaf=29, # How many times a value of a feature must show up inorder to build a decision tree around it
+        max_features=0.75,   # % of features to randomly consider in creating a branch in our tree
+        loss='huber'         # calculate the error rate
     )
 
     model.fit(x_train, y_train)

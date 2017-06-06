@@ -91,12 +91,14 @@ def draw_card(hands):
 game = ''
 hands = [Hand(),Hand(),Hand()]
 
+# Each player at the poker table gets
+# three cards each
 for x in range(0, 3):
-    hands[0].add_card(draw_card(hands))
-    hands[1].add_card(draw_card(hands))
+    for i in range(0, len(hands) - 1):
+        hands[i].add_card(draw_card(hands))
 
 for x in range(0, 2):
-    hands[2].add_card(draw_card(hands))
+    hands[-1].add_card(draw_card(hands))
 
 for hand in hands:
     print(hand)
@@ -105,8 +107,8 @@ model = joblib.load('trained_poker.pkl')
 
 # scikit-learn is expecting a list of data sets
 hands_to_value = [
-    (hands[0].stringify() + ',' + hands[2].stringify()).split(','),
-    (hands[1].stringify() + ',' + hands[2].stringify()).split(',')
+    (hands[0].stringify() + ',' + hands[-1].stringify()).split(','),
+    (hands[1].stringify() + ',' + hands[-1].stringify()).split(',')
 ]
 
 # Run the model and make a prediction
