@@ -1,7 +1,7 @@
 
 '''
     This script creates training data for
-    playing a poker game
+    playing n_test_data number of poker games
 '''
 
 from sklearn.externals import joblib
@@ -11,31 +11,29 @@ from poker_lib import *
 n_test_data = 2500
 
 
-with open('poker_game_training.data', 'w') as f:
+with open('poker-game-training.data', 'w') as f:
     f.write('suit_1,rank_1,suit_2,rank_2,suit_3,rank_3,suit_4,rank_4,suit_5,rank_5,class\n')
 
     for j in range(0, n_test_data):
-        hands = [Hand(),Hand(),Hand()]
+        players = [Hand(),Hand()]
+        table = Hand()
 
         # Each player at the poker table gets
-        # three cards each
-        for x in range(0, 3):
-            for i in range(0, len(hands) - 1):
-                hands[i].add_card(draw_card(hands))
+        # two cards each
+        draw_hole_cards(players)
 
-        for x in range(0, 2):
-            hands[-1].add_card(draw_card(hands))
+        # Draw the flop cards that all players get
+        draw_flop(players, table)
 
         # for hand in hands:
         #     print(hand)
 
-        model = joblib.load('trained_poker.pkl')
+        model = joblib.load('trained-poker-hand.pkl')
 
         # scikit-learn is expecting a list of data sets
-        hands_to_value = [
-            (hands[0].stringify() + ',' + hands[-1].stringify()).split(','),
-            (hands[1].stringify() + ',' + hands[-1].stringify()).split(',')
-        ]
+        players_to_value = \
+            [(player.stringify() + ',' + table.stringify()).split(',')
+             for player in players]
 
         # Run the model and make a prediction
         predicted_hand_values = model.predict(hands_to_value)
@@ -65,7 +63,7 @@ with open('poker_game_training.data', 'w') as f:
 
         f.write(hands[0].stringify()
                 + ','
-                + hands[-1].stringify()
+                + table.stringify()
                 + ','
                 + str(outcome)
                 + '\n')

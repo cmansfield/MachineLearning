@@ -1,5 +1,6 @@
 
 # Deep learning - Build a network
+# build a network for playing a poker game
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn import ensemble
@@ -9,7 +10,7 @@ from sklearn.externals import joblib
 
 
 def run():
-    df = pd.read_csv('poker_game_training.data', header=0)
+    df = pd.read_csv('poker-game-training.data', header=0)
 
     # Remove the sale price as a feature
     features_df = df.drop('class', axis=1)
@@ -34,7 +35,7 @@ def run():
     model.fit(x_train, y_train)
 
     # Save the trained model to a file so we can use it in other programs
-    joblib.dump(model, 'trained_poker_game.pkl')
+    joblib.dump(model, 'trained-poker-game.pkl')
 
     # Find the error rate on the training set
     mse = mean_absolute_error(y_train, model.predict(x_train))
