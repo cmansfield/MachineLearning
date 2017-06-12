@@ -25,9 +25,6 @@ with open('poker-game-training.data', 'w') as f:
         # Draw the flop cards that all players get
         draw_flop(players, table)
 
-        # for hand in hands:
-        #     print(hand)
-
         model = joblib.load('trained-poker-hand.pkl')
 
         # scikit-learn is expecting a list of data sets
@@ -42,24 +39,12 @@ with open('poker-game-training.data', 'w') as f:
         opponent_hand_predicted_value = int(round(predicted_hand_values[1]))
 
         outcome = 0
-        # print('Your poker hand has an estimated value of {:.2f}'.format(predicted_hand_values[0]))
-        # print('Opponent poker hand has an estimated value of {:.2f}'.format(predicted_hand_values[1]))
 
         if(player_hand_predicted_value > opponent_hand_predicted_value):
-            # print('You Won!')
             outcome = 1
-        # elif(player_hand_predicted_value < opponent_hand_predicted_value):
-        #     print('You lost...')
         else:
             hand_values = tie_breaker(hands)
-            # print(hand_values)
-            if (hand_values[0] == 1):
-                # print('You Won!')
-                outcome = 1
-            # elif (hand_values[0] == 0):
-            #     print('You lost...')
-            # else:
-            #     print('Looks like you tied')
+            if (hand_values[0] == 1): outcome = 1
 
         f.write(hands[0].stringify()
                 + ','
