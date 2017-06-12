@@ -11,7 +11,7 @@ NUM_FLOP_CARDS = 3
 # list that indicates which hand won. All losing
 # hands are given a '0' and the winning hand
 # is given a '1'
-def tie_breaker(hands):
+def tie_breaker(hands,table):
     value = lambda x: 14 if x==1 else x
     total_values = []
     max_hand_index = 0
@@ -19,10 +19,10 @@ def tie_breaker(hands):
 
     # don't include the last hand, that's
     # the table's cards
-    for i in range(0, len(hands) - 1):
+    for i,hand in enumerate(hands):
         total_values.append(0)
         card_values = {}
-        for card in set(hands[i].cards).union(hands[-1].cards):
+        for card in set(hand.cards).union(table.cards):
             if card.value in card_values:
                 card_values[card.value] += value(card.value) * 1000
             else:

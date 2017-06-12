@@ -30,7 +30,7 @@ players_to_value = \
      for player in players]
 
 # Run the model and make a prediction
-predicted_hand_values = model.predict(hands_to_value)
+predicted_hand_values = model.predict(players_to_value)
 
 player_hand_predicted_value = int(round(predicted_hand_values[0]))
 opponent_hand_predicted_value = int(round(predicted_hand_values[1]))
@@ -43,11 +43,8 @@ if(player_hand_predicted_value > opponent_hand_predicted_value):
 elif(player_hand_predicted_value < opponent_hand_predicted_value):
     print('You lost...')
 else:
-    hand_values = poker_lib.tie_breaker(hands)
+    hand_values = poker_lib.tie_breaker(players,table)
     print(hand_values)
-    if (hand_values[0] == 1):
-        print('You Won!')
-    elif (hand_values[0] == 0):
-        print('You lost...')
-    else:
-        print('Looks like you tied')
+    if (hand_values[0] == 1): print('You Won!')
+    elif (hand_values[0] == 0): print('You lost...')
+    else: print('Looks like you tied')

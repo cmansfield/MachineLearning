@@ -33,7 +33,7 @@ with open('poker-game-training.data', 'w') as f:
              for player in players]
 
         # Run the model and make a prediction
-        predicted_hand_values = model.predict(hands_to_value)
+        predicted_hand_values = model.predict(players_to_value)
 
         player_hand_predicted_value = int(round(predicted_hand_values[0]))
         opponent_hand_predicted_value = int(round(predicted_hand_values[1]))
@@ -43,7 +43,7 @@ with open('poker-game-training.data', 'w') as f:
         if(player_hand_predicted_value > opponent_hand_predicted_value):
             outcome = 1
         else:
-            hand_values = tie_breaker(hands)
+            hand_values = tie_breaker(players,table)
             if (hand_values[0] == 1): outcome = 1
 
         f.write(hands[0].stringify()
